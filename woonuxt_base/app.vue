@@ -9,7 +9,7 @@ const underlayCick = () => {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen">
+  <div class="flex flex-col min-h-screen bg-red-500">
     <AppHeader />
 
     <Transition name="slide-from-right">
