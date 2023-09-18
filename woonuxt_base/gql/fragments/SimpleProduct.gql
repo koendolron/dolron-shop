@@ -1,0 +1,31 @@
+fragment SimpleProduct on SimpleProduct {
+  price
+  rawPrice: price(format: RAW)
+  slug
+  regularPrice
+  rawRegularPrice: regularPrice(format: RAW)
+  salePrice
+  rawSalePrice: salePrice(format: RAW)
+  stockStatus
+  stockQuantity
+  description
+  rawDescription: description(format: RAW)
+  shortDescription
+  averageRating
+  weight
+  length
+  width
+  height
+  reviewCount
+  image {
+    sourceUrl
+    cartSourceUrl: sourceUrl(size: THUMBNAIL)
+    altText
+    title
+  }
+  galleryImages {
+    nodes {
+      sourceUrl
+    }
+  }
+}
