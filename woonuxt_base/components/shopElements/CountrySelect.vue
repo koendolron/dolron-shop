@@ -247,7 +247,7 @@ const countries = [
 ];
 
 const props = defineProps({
-  modelValue: { type: String, default: 'IE' },
+  modelValue: { type: String, default: 'NL' },
   allowedCountries: { type: Array, default: [] },
 });
 

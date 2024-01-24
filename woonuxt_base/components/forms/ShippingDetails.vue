@@ -1,5 +1,5 @@
 <script setup>
-const { allowedCountries } = await GqlGetStates({ country: 'NL' });
+const { allowedCountries } = [];
 const { updateShippingLocation } = useCheckout();
 
 const props = defineProps({
@@ -48,7 +48,7 @@ const shipping = toRef(props, 'modelValue');
 
     <div class="w-full">
       <label for="country">{{ $t('messages.billing.country') }}</label>
-      <LazyCountrySelect v-model="shipping.country" :default-value="shipping.country" :allowed-countries="allowedCountries" @change="updateShippingLocation" />
+      <!-- <LazyCountrySelect v-model="shipping.country" :default-value="shipping.country" :allowed-countries="allowedCountries" @change="updateShippingLocation" /> -->
     </div>
 
     <div class="w-full col-span-full">
