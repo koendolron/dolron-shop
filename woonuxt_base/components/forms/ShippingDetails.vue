@@ -1,5 +1,5 @@
 <script setup>
-const { allowedCountries } = await GqlGetStates({ country: 'IE' });
+const { allowedCountries } = await GqlGetStates({ country: 'NL' });
 const { updateShippingLocation } = useCheckout();
 
 const props = defineProps({

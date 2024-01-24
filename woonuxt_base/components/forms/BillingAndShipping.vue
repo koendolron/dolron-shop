@@ -124,7 +124,7 @@
 
 <script setup>
 const { viewer, customer } = useAuth();
-const { allowedCountries } = GqlGetStates({ country: 'IE' });
+const { allowedCountries } = GqlGetStates({ country: 'NL' });
 
 const loading = ref(false);
 const buttonText = computed(() => (loading.value ? 'Updating...' : 'Update Details'));
