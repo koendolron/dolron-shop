@@ -1,5 +1,10 @@
+/**
+ * @name useCart
+ * @description A composable that handles the cart in local storage
+ */
+
 export function useCart() {
-  const cart = useState<Cart | null>('cart', () => null);
+  const cart = useState<Cart | null>('cart');
   const isShowingCart = useState<boolean>('isShowingCart', () => false);
   const isUpdatingCart = useState<boolean>('isUpdatingCart', () => false);
   const isUpdatingCoupon = useState<boolean>('isUpdatingCoupon', () => false);
@@ -34,7 +39,7 @@ export function useCart() {
 
   // toggle the cart visibility
   function toggleCart(state: boolean | undefined = undefined): void {
-    state === undefined ? (isShowingCart.value = !isShowingCart.value) : (isShowingCart.value = state);
+    isShowingCart.value = state ?? !isShowingCart.value;
   }
 
   // add an item to the cart
@@ -43,7 +48,7 @@ export function useCart() {
 
     try {
       const { addToCart } = await GqlAddToCart({ input });
-      cart.value = addToCart?.cart || null;
+      cart.value = addToCart?.cart ?? null;
     } catch (error: any) {
       const errorMessage = error?.gqlErrors?.[0].message;
       if (errorMessage) console.error(errorMessage);
@@ -54,7 +59,7 @@ export function useCart() {
   async function removeItem(key: string) {
     isUpdatingCart.value = true;
     const { updateItemQuantities } = await GqlUpDateCartQuantity({ key, quantity: 0 });
-    cart.value = updateItemQuantities?.cart || null;
+    cart.value = updateItemQuantities?.cart ?? null;
   }
 
   // update the quantity of an item in the cart
@@ -62,20 +67,23 @@ export function useCart() {
     isUpdatingCart.value = true;
     try {
       const { updateItemQuantities } = await GqlUpDateCartQuantity({ key, quantity });
-      cart.value = updateItemQuantities?.cart || null;
+      cart.value = updateItemQuantities?.cart ?? null;
       return quantity;
     } catch (error: any) {
-      const errorMessage = error?.gqlErrors?.[0].message;
-      if (errorMessage) console.error(errorMessage);
+      const errorMessage = error?.gqlErrors?.[0]?.message;
+      if (errorMessage) {
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+      throw new Error('An unknown error occurred while updating item quantity');
     }
-    return quantity;
   }
 
   // empty the cart
   async function emptyCart(): Promise<void> {
     try {
       const { emptyCart } = await GqlEmptyCart();
-      cart.value = emptyCart?.cart || null;
+      cart.value = emptyCart?.cart ?? null;
     } catch (error: any) {
       const errorMessage = error?.gqlErrors?.[0].message;
       if (errorMessage) console.error(errorMessage);
@@ -86,7 +94,7 @@ export function useCart() {
   async function updateShippingMethod(shippingMethods: string) {
     isUpdatingCart.value = true;
     const { updateShippingMethod } = await GqlChangeShippingMethod({ shippingMethods });
-    cart.value = updateShippingMethod?.cart || null;
+    cart.value = updateShippingMethod?.cart ?? null;
   }
 
   // Apply coupon
@@ -94,7 +102,7 @@ export function useCart() {
     try {
       isUpdatingCoupon.value = true;
       const { applyCoupon } = await GqlApplyCoupon({ code });
-      cart.value = applyCoupon?.cart || null;
+      cart.value = applyCoupon?.cart ?? null;
       isUpdatingCoupon.value = false;
     } catch (error: any) {
       isUpdatingCoupon.value = false;
@@ -111,7 +119,7 @@ export function useCart() {
   async function removeCoupon(code: string): Promise<void> {
     try {
       const { removeCoupons } = await GqlRemoveCoupons({ codes: [code] });
-      cart.value = removeCoupons?.cart || null;
+      cart.value = removeCoupons?.cart ?? null;
     } catch (error) {
       console.error(error);
     }
@@ -127,6 +135,7 @@ export function useCart() {
     isUpdatingCart,
     isUpdatingCoupon,
     paymentGateways,
+    updateCart,
     refreshCart,
     toggleCart,
     addToCart,

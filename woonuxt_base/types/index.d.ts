@@ -65,16 +65,18 @@ interface ProductCategory {
   slug: string;
   name: string;
   count: number;
+  image?: ProductImage | null;
 }
 
 interface Attribute {
-  value?: string | null;
-  name?: string | null;
+  value: string;
+  name: string;
 }
 
 interface ProductAttribute {
-  name?: string | null;
-  options?: Array<string | null> | null;
+  name: string;
+  label: string;
+  options?: Array<string> | null;
   variation?: boolean | null;
   visible?: boolean | null;
 }
@@ -84,9 +86,28 @@ interface ProductTerm {
   slug?: string | null;
 }
 
+interface Author {
+  name?: string | null;
+  avatar?: { url?: string | null } | null;
+}
+
+interface Review {
+  rating?: number | null;
+  content?: string | null;
+  id?: string | null;
+  date?: string | null;
+  author?: { node?: Author | null } | null;
+}
+
+interface Reviews {
+  averageRating?: number | null;
+  edges?: Array<{ rating?: number | null; node?: Review | null }> | null;
+}
+
 interface Product {
   name?: string | null;
   databaseId?: number | null;
+  id?: string | null;
   slug?: string | null;
   sku?: string | null;
   onSale?: boolean | null;
@@ -118,6 +139,7 @@ interface Product {
   variations?: { nodes: Variation[] } | null;
   node: SimpleProduct | VariableProduct;
   related?: { nodes: Array<Product> } | null;
+  reviews?: Reviews | null;
 }
 
 interface SimpleProduct {
@@ -257,4 +279,9 @@ interface Order {
   date?: string | null;
   customer?: Customer | null;
   lineItems?: { nodes?: LineItem[] } | null;
+}
+interface WooNuxtSEOItem {
+  provider: string;
+  url?: string;
+  handle?: string;
 }

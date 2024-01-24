@@ -1,34 +1,5 @@
-<template>
-  <div class="grid gap-4 shipping-options">
-    <div
-      v-for="option in options"
-      :key="option.id"
-      class="flex option items-center justify-between"
-      :class="{ 'active-option': option.id === activeOption }"
-      @click="setActiveOption(option.id)">
-      <div>
-        <div class="text-sm leading-tight text-gray-500" v-html="option.label"></div>
-        <div class="font-semibold text-gray-600">€{{ option.cost }}</div>
-      </div>
-      <LoadingIcon v-if="option.id !== activeOption && isUpdatingCart" />
-      <template v-else>
-        <svg
-          v-if="option.id === activeOption"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          width="20"
-          height="20"
-          class="rounded-full text-white p-1"
-          fill="currentColor">
-          <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
-        </svg>
-      </template>
-    </div>
-  </div>
-</template>
-
 <script setup>
-const { updateShippingMethod, isUpdatingCart, cart } = useCart();
+const { updateShippingMethod } = useCart();
 const props = defineProps({
   options: { type: Array, required: true },
   activeOption: { type: String, required: true },
@@ -39,9 +10,29 @@ const setActiveOption = async (id) => {
 };
 </script>
 
+<template>
+  <div class="grid gap-4 shipping-options">
+    <div
+      v-for="option in options"
+      :key="option.id"
+      class="flex items-center justify-between option"
+      :class="{ 'active-option': option.id === activeOption }"
+      @click="setActiveOption(option.id)">
+      <div>
+        <div class="text-sm leading-tight text-gray-500" v-html="option.label"></div>
+        <div class="font-semibold text-gray-600">€{{ option.cost }}</div>
+      </div>
+
+      <svg v-if="option.id === activeOption" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" class="p-1 text-white rounded-full" fill="currentColor">
+        <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
+      </svg>
+    </div>
+  </div>
+</template>
+
 <style lang="postcss">
 .shipping-options {
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 .shipping-options .option {

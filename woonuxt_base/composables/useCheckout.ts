@@ -10,6 +10,28 @@ export function useCheckout() {
 
   const isProcessingOrder = useState<boolean>('isProcessingOrder', () => false);
 
+  // if Country or State are changed, calculate the shipping rates again
+  async function updateShippingLocation() {
+    const { customer, viewer } = useAuth();
+    const { isUpdatingCart, refreshCart } = useCart();
+
+    isUpdatingCart.value = true;
+
+    try {
+      const { updateCustomer } = await GqlUpdateCustomer({
+        input: {
+          id: viewer?.value?.id,
+          shipping: orderInput.value.shipToDifferentAddress ? customer.value.shipping : customer.value.billing,
+          billing: customer.value.billing,
+        },
+      });
+
+      if (updateCustomer) refreshCart();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const proccessCheckout = async () => {
     const { loginUser } = useAuth();
     const router = useRouter();
@@ -91,9 +113,8 @@ export function useCheckout() {
 
       // PayPal redirect
       if ((await checkout?.redirect) && orderInput.value.paymentMethod === 'paypal') {
-        const runtimeConfig = useRuntimeConfig();
-        const frontEndUrl = runtimeConfig?.public?.FRONT_END_URL;
-        let redirectUrl = checkout?.redirect || '';
+        const frontEndUrl = window.location.origin;
+        let redirectUrl = checkout?.redirect ?? '';
 
         const payPalReturnUrl = `${frontEndUrl}/checkout/order-received/${orderId}/?key=${orderKey}`;
         const payPalCancelUrl = `${frontEndUrl}/checkout/?cancel_order=true`;
@@ -112,6 +133,12 @@ export function useCheckout() {
     } catch (error: any) {
       const errorMessage = error?.gqlErrors?.[0].message;
       isProcessingOrder.value = false;
+
+      if (errorMessage?.includes('An account is already registered with your email address')) {
+        alert('An account is already registered with your email address');
+        return null;
+      }
+
       alert(errorMessage);
       return null;
     }
@@ -119,7 +146,8 @@ export function useCheckout() {
 
   return {
     orderInput,
-    proccessCheckout,
     isProcessingOrder,
+    proccessCheckout,
+    updateShippingLocation,
   };
 }

@@ -1,5 +1,6 @@
-export default defineNuxtPlugin(async () => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   useGqlCors({ credentials: 'include', mode: 'cors' });
+
   if (process.client) {
     const { clearAllCookies } = useHelpers();
     const sessionToken = useCookie('woocommerce-session');
@@ -9,37 +10,43 @@ export default defineNuxtPlugin(async () => {
     let initialised = false;
     const eventsToFireOn = ['mousedown', 'keydown', 'touchstart', 'scroll', 'wheel', 'click', 'resize', 'mousemove', 'mouseover'];
 
+    async function initStore() {
+      if (initialised) {
+        // We only want to execute this code block once, so we return if initialised is truthy and remove the event listeners
+        eventsToFireOn.forEach((event) => {
+          window.removeEventListener(event, initStore);
+        });
+        return;
+      }
+
+      initialised = true;
+
+      const { refreshCart } = useCart();
+      const success = await refreshCart();
+      if (!success) {
+        clearAllCookies();
+
+        // Add a new cookie to prevent infinite reloads
+        const reloadCount = useCookie('reloadCount');
+        if (!reloadCount.value) {
+          reloadCount.value = '1';
+        } else {
+          return;
+        }
+
+        // Log out the user
+        const { logoutUser } = useAuth();
+        await logoutUser();
+
+        if (!reloadCount.value) window.location.reload();
+      }
+    }
+
     eventsToFireOn.forEach((event) => {
-      window.addEventListener(
-        event,
-        async () => {
-          // We only want to execute this code block once, so we return if initialised is truthy.
-          if (initialised) return;
-          initialised = true;
-
-          const { refreshCart } = useCart();
-          const success = await refreshCart();
-          if (!success) {
-            clearAllCookies();
-
-            // Add a new cookie to prevent infinite reloads
-            const reloadCount = useCookie('reloadCount');
-            if (!reloadCount.value) {
-              reloadCount.value = '1';
-            } else {
-              return;
-            }
-
-            // Log out the user
-            const { logoutUser } = useAuth();
-            const logout = await logoutUser();
-            !logout.success ? console.log('logoutUser failed') : console.log('logoutUser success');
-
-            if (!reloadCount.value) window.location.reload();
-          }
-        },
-        { once: true }
-      );
+      window.addEventListener(event, initStore, { once: true });
     });
+
+    // If we are in development mode, we want to initialise the store immediately
+    if (process.env.NODE_ENV === 'development') initStore();
   }
 });

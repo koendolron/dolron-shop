@@ -1,24 +1,18 @@
 <script setup>
-const { cart } = useCart();
+const { cart, isUpdatingCart } = useCart();
 </script>
 
 <template>
-  <aside class="bg-white rounded-lg shadow-lg mb-8 w-full min-h-[250px] p-8 relative md:max-w-sm md:top-32 md:sticky">
-    <h2 class="mb-4 text-xl font-semibold">{{ $t('messages.shop.orderSummary') }}</h2>
+  <aside class="bg-white rounded-lg shadow-lg mb-8 w-full min-h-[280px] p-8 relative md:max-w-sm md:top-36 md:sticky">
+    <h2 class="mb-6 text-xl font-semibold leading-none">{{ $t('messages.shop.orderSummary') }}</h2>
 
-    <ClientOnly>
-      <template v-if="!cart.isEmpty">
-        <ul class="flex flex-col gap-4 overflow-y-scroll">
-          <div v-for="item in cart.contents.nodes" :key="item.key" :item="item">
-            <CartCard :item="item" />
-          </div>
-        </ul>
-      </template>
-    </ClientOnly>
+    <ul class="flex flex-col gap-4 -mr-2 overflow-y-scroll">
+      <CartCard v-for="item in cart.contents.nodes" :key="item.key" :item="item" />
+    </ul>
 
     <AddCoupon class="my-8" />
 
-    <div v-if="cart" class="grid gap-1 text-sm font-semibold text-gray-500">
+    <div class="grid gap-1 text-sm font-semibold text-gray-500">
       <div class="flex justify-between">
         <span>{{ $t('messages.shop.subtotal') }}</span
         ><spa class="text-gray-700 tabular-nums" v-html="cart.subtotal" />
@@ -40,5 +34,9 @@ const { cart } = useCart();
     </div>
 
     <slot></slot>
+
+    <div v-if="isUpdatingCart" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50">
+      <LoadingIcon />
+    </div>
   </aside>
 </template>
